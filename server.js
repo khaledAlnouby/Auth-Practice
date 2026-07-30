@@ -58,6 +58,29 @@ app.post("/auth/login", async (req, res) => {
     }
 });
 
+app.get("/public/info" , (req,res) =>{
+    res.status(200).json({ message :  "Welcome stranger! This info is public."})
+}); 
+
+app.get("/protected/profile" , async (req,res) => {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader) {
+            return res.status(401).json({ error: "Access token required" });
+        }
+
+        const token = authHeader.split(" ")[1];
+        if (!token) {
+            return res.status(401).json({ error: "Access token required" });
+        }
+         res.status(200).json({ message: "You send the token. This info is protected." });
+    }
+    catch (error) {
+        console.error("Error during protected info access:", error);
+        res.status(500).json({ error: "Server Error" });
+    }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running and connected to Supabase at http://localhost:${PORT}`);
 });
