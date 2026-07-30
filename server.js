@@ -73,7 +73,13 @@ app.get("/protected/profile" , async (req,res) => {
         if (!token) {
             return res.status(401).json({ error: "Access token required" });
         }
-         res.status(200).json({ message: "You send the token. This info is protected." });
+        const { data, error } = await supabase.auth.getUser(token);
+        if (error) {
+            return res.status(401).json({ error: "Invalid or expired token" });
+        }
+        res.status(200).json({
+             id: data.user.id, email: data.user.email , created_at: data.user.created_at
+         });
     }
     catch (error) {
         console.error("Error during protected info access:", error);
