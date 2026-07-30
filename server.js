@@ -1,5 +1,6 @@
 const express = require("express");
 const supabase = require("./supabase");
+const authMiddleware = require("./middleware");
 
 const app = express();
 app.use(express.json());
@@ -62,30 +63,35 @@ app.get("/public/info" , (req,res) =>{
     res.status(200).json({ message :  "Welcome stranger! This info is public."})
 }); 
 
-app.get("/protected/profile" , async (req,res) => {
-    try {
-        const authHeader = req.headers.authorization;
-        if (!authHeader) {
-            return res.status(401).json({ error: "Access token required" });
-        }
-
-        const token = authHeader.split(" ")[1];
-        if (!token) {
-            return res.status(401).json({ error: "Access token required" });
-        }
-        const { data, error } = await supabase.auth.getUser(token);
-        if (error) {
-            return res.status(401).json({ error: "Invalid or expired token" });
-        }
-        res.status(200).json({
-             id: data.user.id, email: data.user.email , created_at: data.user.created_at
-         });
-    }
-    catch (error) {
-        console.error("Error during protected info access:", error);
-        res.status(500).json({ error: "Server Error" });
-    }
+app.get("/protected/profile" , authMiddleware, (req,res) => {
+    res.status(200).json({
+        id: req.user.id,
+        email: req.user.email,
+        created_at: req.user.created_at
+    })
 });
+app.get("/protected/dashboard" , authMiddleware, (req,res) => {
+
+    res.status(200).json({ message :  `Welcome ${req.user.email}! This is your dashboard.`})
+});
+
+app.post("/auth/logout", authMiddleware, async (req,res) => {
+    try{
+        const { error } = await supabase.auth.signOut();
+        if(error){
+            return res.status(500).json({
+                error: "Error during logout"
+            })
+        }
+        res.status(204).json({ message: "Successfully logged out" });
+    }
+    catch(error){
+        console.error("Error during logout:", error);
+        res.status(500).json({
+             error: "Server Error"
+             });
+    }
+})
 
 app.listen(PORT, () => {
   console.log(`Server running and connected to Supabase at http://localhost:${PORT}`);
