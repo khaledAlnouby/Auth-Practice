@@ -1,0 +1,251 @@
+{
+"openapi": "3.0.0",
+"info": {
+"title": "Supabase Authentication API",
+"description": "REST API for user authentication using Express.js and Supabase.",
+"version": "1.0.0"
+},
+"servers": [
+{
+"url": "http://localhost:3000"
+}
+],
+"paths": {
+"/auth/signup": {
+"post": {
+"summary": "Register a new user",
+"description": "Creates a new user account using Supabase Authentication.",
+"requestBody": {
+"required": true,
+"content": {
+"application/json": {
+"schema": {
+"type": "object",
+"required": [
+"email",
+"password"
+],
+"properties": {
+"email": {
+"type": "string",
+"format": "email",
+"example": "test@example.com"
+},
+"password": {
+"type": "string",
+"format": "password",
+"example": "password123"
+}
+}
+}
+}
+}
+},
+"responses": {
+"201": {
+"description": "User created successfully"
+},
+"400": {
+"description": "Email or password is missing, or Supabase rejected the signup"
+},
+"500": {
+"description": "Server error"
+}
+}
+}
+},
+
+
+"/auth/login": {
+  "post": {
+    "summary": "Log in a user",
+    "description": "Authenticates a user with email and password and returns Supabase access and refresh tokens.",
+    "requestBody": {
+      "required": true,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "required": [
+              "email",
+              "password"
+            ],
+            "properties": {
+              "email": {
+                "type": "string",
+                "format": "email",
+                "example": "test@example.com"
+              },
+              "password": {
+                "type": "string",
+                "format": "password",
+                "example": "password123"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Login successful",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "access_token": {
+                  "type": "string",
+                  "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                },
+                "refresh_token": {
+                  "type": "string",
+                  "example": "refresh-token-example"
+                }
+              }
+            }
+          }
+        }
+      },
+      "400": {
+        "description": "Email or password is missing"
+      },
+      "401": {
+        "description": "Invalid login credentials"
+      },
+      "500": {
+        "description": "Server error"
+      }
+    }
+  }
+},
+
+"/auth/logout": {
+  "post": {
+    "summary": "Log out the current user",
+    "description": "Logs out the authenticated user.",
+    "security": [
+      {
+        "bearerAuth": []
+      }
+    ],
+    "responses": {
+      "204": {
+        "description": "Logout successful"
+      },
+      "401": {
+        "description": "Access token required or invalid token"
+      },
+      "500": {
+        "description": "Server error"
+      }
+    }
+  }
+},
+
+"/public/info": {
+  "get": {
+    "summary": "Get public information",
+    "description": "A public endpoint that does not require authentication.",
+    "responses": {
+      "200": {
+        "description": "Public information returned successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Welcome stranger! This info is public."
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+},
+
+"/protected/profile": {
+  "get": {
+    "summary": "Get authenticated user profile",
+    "description": "Returns safe information about the authenticated user.",
+    "security": [
+      {
+        "bearerAuth": []
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "User profile returned successfully",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "format": "uuid",
+                  "example": "8f7c7b11-90d8-4dd9-8e25-4458f0ffbfc7"
+                },
+                "email": {
+                  "type": "string",
+                  "format": "email",
+                  "example": "test@example.com"
+                },
+                "created_at": {
+                  "type": "string",
+                  "format": "date-time",
+                  "example": "2026-07-29T16:12:19.17998Z"
+                }
+              }
+            }
+          }
+        }
+      },
+      "401": {
+        "description": "Access token required or invalid/expired token"
+      },
+      "500": {
+        "description": "Server error"
+      }
+    }
+  }
+},
+
+"/protected/dashboard": {
+  "get": {
+    "summary": "Get protected dashboard",
+    "description": "A protected endpoint that can only be accessed by an authenticated user.",
+    "security": [
+      {
+        "bearerAuth": []
+      }
+    ],
+    "responses": {
+      "200": {
+        "description": "Dashboard returned successfully"
+      },
+      "401": {
+        "description": "Access token required or invalid/expired token"
+      },
+      "500": {
+        "description": "Server error"
+      }
+    }
+  }
+}
+
+},
+"components": {
+"securitySchemes": {
+"bearerAuth": {
+"type": "http",
+"scheme": "bearer",
+"bearerFormat": "JWT"
+}
+}
+}
+}

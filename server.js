@@ -1,12 +1,15 @@
 const express = require("express");
 const supabase = require("./supabase");
 const authMiddleware = require("./middleware");
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocument = require("./openapi.json");
 
 const app = express();
 app.use(express.json());
 
 const PORT = process.env.port || 3000; 
 
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.get("/" , (req,res) => {
   res.json({ message: "Hello, World!" });
